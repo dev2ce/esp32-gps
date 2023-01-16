@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<style>
+			#map-container{
+				width: 100%;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+
+			#map {
+				height: 800px;
+				width: 90%;
+				border-style: solid;
+				border-width: 2px;
+				border-color: black;
+			}
+
+			h1 {
+				text-align: center;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>GPS Display Demo</h1>
+		<div id="map-container">
+			<div id="map"></div>
+		</div>
+		<script
+			src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAU5EP1XNSMcP4hi0AgUD0hH0Ib5ElfJoo"
+		></script>
+		<script>
+			var currentLocation = { lat: 21.006108, lng: 105.803913 };
+			var intId;
+
+			var map;
+			var marker;
+
+			function initMap() {
+				map = new google.maps.Map(document.getElementById("map"), {
+					zoom: 19,
+					center: currentLocation,
+				});
+				marker = new google.maps.Marker({
+					position: currentLocation,
+					map: map,
+				});
+			}
+
+			function getRemoteGpsData() {
+				fetch("http://localhost:8080/gps_data")
+					.then((response) => response.json())
+					.then((data) => {
+						// update currentLocation
+						currentLocation.lat = data["latitude"];
+						currentLocation.lng = data["longtitude"];
+						console.log("Just update my current location to be: ", currentLocation);
+					})
+					.catch((error) => {
+						clearInterval(intId);
+					});
+
+					map.setCenter(currentLocation);
+					marker.setPosition(currentLocation);
+			}
+			// call immediately
+
+			initMap();
+			getRemoteGpsData();
+			// set call periodically
+			intId = setInterval(getRemoteGpsData, 2000);
+		</script>
+	</body>
+</html>
